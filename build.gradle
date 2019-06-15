@@ -1,0 +1,104 @@
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile 'commons-io:commons-io:2.6'
+    compile 'com.github.javaparser:javaparser-core:3.14.3'
+    compile "org.junit.jupiter:junit-jupiter-api:5.4.2"
+    compile 'org.hamcrest:hamcrest-core:2.1'
+    testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
+}
+
+
+task sync(type: Sync) {
+    from 'build/classes/java/main'
+    into 'target/classes'
+    mustRunAfter compileJava
+}
+
+test {
+    dependsOn sync
+    classpath = classpath + files("target/classes")
+    useJUnitPlatform()
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    archiveClassifier = 'javadoc'
+}
+
+javadoc {
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.github.hcsp'
+            artifactId = 'test-helpers'
+            version = '0.1.0'
+
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = 'test-helpers'
+                description = 'A collections of helper methods for tests'
+                url = 'https://github.com/hcsp/test-helpers'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'blindpirate'
+                        name = 'Bo Zhang'
+                        email = 'zhangbodut@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/hcsp/test-helpers.git'
+                    developerConnection = 'scm:git:git@github.com:hcsp/test-helpers.git'
+                    url = 'https://github.com/hcsp/test-helpers'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url = version.endsWith('SNAPSHOT') ? SNAPSHOT_REPOSITORY_URL : RELEASE_REPOSITORY_URL
+
+            authentication {
+                basic(BasicAuthentication) {
+                    credentials {
+                        username = NEXUS_USERNAME
+                        password = NEXUS_PASSWORD
+                    }
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.maven
+}
