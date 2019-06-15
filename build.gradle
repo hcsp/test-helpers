@@ -13,7 +13,6 @@ dependencies {
     compile 'commons-io:commons-io:2.6'
     compile 'com.github.javaparser:javaparser-core:3.14.3'
     compile "org.junit.jupiter:junit-jupiter-api:5.4.2"
-    compile 'org.hamcrest:hamcrest-core:2.1'
     testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
 }
 
