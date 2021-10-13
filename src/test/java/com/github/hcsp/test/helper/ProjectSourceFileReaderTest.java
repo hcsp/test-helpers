@@ -4,7 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ProjectSourceFileReaderTest {
     @Test
@@ -26,5 +27,10 @@ class ProjectSourceFileReaderTest {
     @Test
     public void readAsStringTest() {
         assertTrue(ProjectSourceFileReader.readAsString(JavaASTReader.class).contains("public class JavaASTReader"));
+    }
+
+    @Test
+    public void canMd5ASourceFile() {
+        assertEquals("b7af388d69b5f83dfec5b46d8c25648f", ProjectSourceFileReader.md5SpaceRemoved(TestMd5.class));
     }
 }
