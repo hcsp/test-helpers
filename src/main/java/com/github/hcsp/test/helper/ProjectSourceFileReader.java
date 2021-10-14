@@ -4,6 +4,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+import org.opentest4j.TestAbortedException;
 
 import java.io.File;
 import java.io.FileReader;
@@ -18,6 +19,12 @@ public class ProjectSourceFileReader {
         File main = new File(targetClassDir, "../../src/main/java/" + klass.getName().replaceAll("\\.", "/") + ".java").getAbsoluteFile();
         File test = new File(targetClassDir, "../../src/test/java/" + klass.getName().replaceAll("\\.", "/") + ".java").getAbsoluteFile();
         return main.exists() ? main : test;
+    }
+
+    public static void abortTestIfClassNotChanged(Class klass, String md5) {
+        if (md5.equals(md5SpaceRemoved(readAsString(klass)))) {
+            throw new TestAbortedException("Abort test for " + klass + " as it's unchanged.");
+        }
     }
 
     public static String readAsString(Class klass) {
