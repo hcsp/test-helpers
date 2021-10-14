@@ -51,7 +51,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'com.github.hcsp'
             artifactId = 'test-helpers'
-            version = '0.6'
+            version = '0.8'
 
             from components.java
             artifact sourcesJar

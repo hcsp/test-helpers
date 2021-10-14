@@ -10,20 +10,36 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.stream.Stream;
 
 public class ProjectSourceFileReader {
-    public static File read(Class klass) {
+    public static File locateProjectDir() {
         Stream<String> entries = Stream.of(System.getProperty("java.class.path").split(File.pathSeparator));
         File targetClassDir = entries.filter(entry -> entry.endsWith("target/classes") || entry.endsWith("target\\classes")).findFirst().map(File::new).orElseThrow(IllegalStateException::new);
-        File main = new File(targetClassDir, "../../src/main/java/" + klass.getName().replaceAll("\\.", "/") + ".java").getAbsoluteFile();
-        File test = new File(targetClassDir, "../../src/test/java/" + klass.getName().replaceAll("\\.", "/") + ".java").getAbsoluteFile();
+        return new File(targetClassDir, "../..").getAbsoluteFile();
+    }
+
+    public static File read(Class klass) {
+        File projectDir = locateProjectDir();
+        File main = new File(projectDir, "src/main/java/" + klass.getName().replaceAll("\\.", "/") + ".java").getAbsoluteFile();
+        File test = new File(projectDir, "src/test/java/" + klass.getName().replaceAll("\\.", "/") + ".java").getAbsoluteFile();
         return main.exists() ? main : test;
     }
 
     public static void abortTestIfClassNotChanged(Class klass, String md5) {
         if (md5.equals(md5SpaceRemoved(readAsString(klass)))) {
             throw new TestAbortedException("Abort test for " + klass + " as it's unchanged.");
+        }
+    }
+
+    public static String readFile(String relativePath) {
+        try {
+            File file = new File(locateProjectDir(), relativePath);
+            return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
