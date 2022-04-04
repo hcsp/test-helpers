@@ -6,11 +6,15 @@ import org.junit.jupiter.api.Assertions;
 import java.util.List;
 
 public class JavaASTReader {
-    public static <T extends Node> void assertContains(Class targetClass, Class<T> nodeType) {
+    public static <T extends Node> void assertContains(Class<?> targetClass, Class<T> nodeType) {
         Assertions.assertTrue(findAll(targetClass, nodeType).size() > 0);
     }
 
-    public static <T extends Node> List<T> findAll(Class targetClass, Class<T> nodeType) {
+    public static <T extends Node> void assertNotContains(Class<?> targetClass, Class<T> nodeType) {
+        Assertions.assertTrue(findAll(targetClass, nodeType).isEmpty());
+    }
+
+    public static <T extends Node> List<T> findAll(Class<?> targetClass, Class<T> nodeType) {
         return ProjectSourceFileReader.readAsCompilationUnit(targetClass).findAll(nodeType);
     }
 }
